@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="canvas"></div>
+
+    <script type="importmap">
+  {
+"imports": {
+  "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+}
+  }
+</script>
+    <script type="module">
+        import * as THREE from "three";
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const geometry = new THREE.BoxGeometry(3, 3, 3);
+        const materials = [
+            new THREE.MeshBasicMaterial({ color: 0xff6400 }),
+            new THREE.MeshBasicMaterial({ color: 0xff0000 }),
+            new THREE.MeshBasicMaterial({ color: 0x0000bb }),
+            new THREE.MeshBasicMaterial({ color: 0x00bb00 }),
+            new THREE.MeshBasicMaterial({ color: 0xffff00 }),
+            new THREE.MeshBasicMaterial({ color: 0xffffff })
+        ];
+
+        const cube = new THREE.Mesh(geometry, materials);
+        const edges = new THREE.EdgesGeometry(geometry);
+        const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }),);
+        scene.add(line);
+        var controls = new OrbitControls(camera, renderer.domElement);
+
+
+
+        for (let x = 0; x < 3; x++) {
+            for (let y = 0; y < 3; y++) {
+                for (let z = 0; z < 3; z++) {
+                    const newCube = cube.clone();
+                    newCube.position.x = x * 3;
+                    newCube.position.y = y * 3;
+                    newCube.position.z = z * 3;
+                    scene.add(newCube);
+
+                    var pivot = new THREE.Group();
+                    scene.add(pivot);
+                    pivot.add(newCube);
+
+                    const newLine = line.clone();
+                    newLine.position.x = x * 3;
+                    newLine.position.y = y * 3;
+                    newLine.position.z = z * 3;
+                    scene.add(newLine);
+                }
+            }
+        }
+
+            var box = new THREE.Box3().setFromObject(pivot);
+            box.getCenter(pivot.position);
+            // this re-sets the mesh position
+            cube.position.multiplyScalar(- 1);
+            
+
+        
+
+        // var box = new THREE.Box3().setFromObject(cube);
+        // box.getCenter(cube.position); // this re-sets the mesh position
+        // cube.position.multiplyScalar(- 1);
+
+        // var pivot = new THREE.Group();
+        // scene.add(pivot);
+        // pivot.add(cube);
+
+        camera.position.z = 30;
+        camera.position.y = 3;
+        camera.position.x = 3;
+        var xSpeed = 1; // Adjust the speed of rotation around the x-axis
+        var ySpeed = 1; // Adjust the speed of rotation around the y-axis
+        var zSpeed = 1; // Adjust the speed of rotation around the z-axis
+        function animate(time) {
+            // cube.rotation.x = time / ySpeed;
+            // cube.rotation.y = time / xSpeed;
+            // cube.rotation.z = time / zSpeed;
+            renderer.render(scene, camera);
+        }
+        renderer.setAnimationLoop(animate);
+
+        // if (keyboard.isPressed("ArrowUp")) {
+        //     cube.position.y += 0.1;
+        // }
+        document.addEventListener("keydown", onDocumentKeyDown, false);
+        function onDocumentKeyDown(event) {
+            console.log("Key pressed: " + event.key);
+            var keyCode = event.which;
+            if (keyCode == 87) {
+                console.log("W key pressed");
+                cube.position.y += ySpeed;
+            } else if (keyCode == 83) {
+                console.log("S key pressed");
+                cube.position.y -= ySpeed;
+            } else if (keyCode == 65) {
+                console.log("A key pressed");
+                cube.position.x -= xSpeed;
+            } else if (keyCode == 68) {
+                console.log("D key pressed");
+                cube.position.x += xSpeed;
+            } else if (keyCode == 32) {
+                console.log("Space key pressed");
+                cube.position.set(0, 0, 0);
+            }
+        };
+
+
+    </script>
+</body>
+
+</html>
