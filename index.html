@@ -30,51 +30,76 @@
 
         const geometry = new THREE.BoxGeometry(3, 3, 3);
         const materials = [
-            new THREE.MeshBasicMaterial({ color: 0xff6400 }),
-            new THREE.MeshBasicMaterial({ color: 0xff0000 }),
-            new THREE.MeshBasicMaterial({ color: 0x0000bb }),
-            new THREE.MeshBasicMaterial({ color: 0x00bb00 }),
-            new THREE.MeshBasicMaterial({ color: 0xffff00 }),
-            new THREE.MeshBasicMaterial({ color: 0xffffff })
+            new THREE.MeshBasicMaterial({ color: 0xff6400 }), // Orange
+            new THREE.MeshBasicMaterial({ color: 0xff0000 }), // Red
+            new THREE.MeshBasicMaterial({ color: 0x0000bb }), // Blue
+            new THREE.MeshBasicMaterial({ color: 0x00bb00 }), // Green
+            new THREE.MeshBasicMaterial({ color: 0xffff00 }), // Yellow
+            new THREE.MeshBasicMaterial({ color: 0xffffff })  // White
         ];
 
-        const cube = new THREE.Mesh(geometry, materials);
+        const material = Array(6).fill(
+            new THREE.MeshBasicMaterial({ color: 0x808080 })
+        );
+        const cube = new THREE.Mesh(geometry, material);
         const edges = new THREE.EdgesGeometry(geometry);
         const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }),);
-        scene.add(line);
         var controls = new OrbitControls(camera, renderer.domElement);
 
-
-
+        var group = new THREE.Group();
+        var pivot = new THREE.Group();
         for (let x = 0; x < 3; x++) {
             for (let y = 0; y < 3; y++) {
                 for (let z = 0; z < 3; z++) {
                     const newCube = cube.clone();
-                    newCube.position.x = x * 3;
-                    newCube.position.y = y * 3;
-                    newCube.position.z = z * 3;
+                    newCube.position.set(
+                        x * 3 - 3,
+                        y * 3 - 3,
+                        z * 3 - 3
+                    );
+                    [
+                        [x === 2, 0],
+                        [x === 0, 1],
+                        [y === 2, 2],
+                        [y === 0, 3],
+                        [z === 2, 4],
+                        [z === 0, 5]
+                    ].forEach(([condition, index]) => {
+                        if (condition) {
+                            newCube.material[index] = materials[index];
+                        }
+                    });
                     scene.add(newCube);
 
-                    var pivot = new THREE.Group();
-                    scene.add(pivot);
+                    if (x == 2) {
+                        console.log("new cube added", newCube);
+                        group.add(newCube);
+                    }
+                    group.add(newCube);
                     pivot.add(newCube);
+                    console.log(pivot, "pivot", group, "group")
 
                     const newLine = line.clone();
-                    newLine.position.x = x * 3;
-                    newLine.position.y = y * 3;
-                    newLine.position.z = z * 3;
+                    newLine.position.set(
+                        x * 3 - 3,
+                        y * 3 - 3,
+                        z * 3 - 3
+                    );
                     scene.add(newLine);
                 }
             }
         }
+        scene.add(pivot);
+        scene.add(group);
+        console.log("group", group)
+        // pivot.rotation.x = 1
+        var box = new THREE.Box3().setFromObject(cube);
+        box.getCenter(cube.position);
+        // this re-sets the mesh position
+        cube.position.multiplyScalar(- 1);
 
-            var box = new THREE.Box3().setFromObject(pivot);
-            box.getCenter(pivot.position);
-            // this re-sets the mesh position
-            cube.position.multiplyScalar(- 1);
-            
 
-        
+
 
         // var box = new THREE.Box3().setFromObject(cube);
         // box.getCenter(cube.position); // this re-sets the mesh position
